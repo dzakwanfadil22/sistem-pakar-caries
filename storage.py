@@ -1,8 +1,10 @@
 """Penyimpanan ke Google Sheets (seperti database). Jika belum dikonfigurasi,
 otomatis disimpan ke data/riwayat.csv sebagai cadangan lokal."""
 import csv, json, os
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 from cf import GEJALA
+
+WIB = timezone(timedelta(hours=7))
 
 KREDENSIAL = os.environ.get("GOOGLE_CREDENTIALS", "credentials.json")
 SHEET_ID = os.environ.get("SPREADSHEET_ID") or "17fB893tiwW6OF3v1Ej6v1dzjxJYl9EL3JTndGNYJRnE"
@@ -34,7 +36,7 @@ def _pakai_sheets():
 
 
 def simpan(nama, umur, nilai, hasil):
-    baris = [datetime.now().strftime("%Y-%m-%d %H:%M:%S"), nama, umur] + \
+    baris = [datetime.now(WIB).strftime("%Y-%m-%d %H:%M:%S"), nama, umur] + \
             [nilai.get(g[0], 0) for g in GEJALA] + [hasil["persen"], hasil["kesimpulan"]]
     if _pakai_sheets():
         _worksheet().append_row(baris, value_input_option="USER_ENTERED")
