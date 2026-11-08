@@ -1,0 +1,72 @@
+{% extends "layout.html" %} {% block title %}Data Pakar{% endblock %} {% block
+body %}
+<style>
+  td.n,
+  th.n {
+    text-align: right;
+  }
+</style>
+<section class="hero noprint">
+  <h1>Data pakar</h1>
+  <p>
+    Gejala karies gigi beserta nilai terminator dari pakar yang dipakai sistem
+    untuk menghitung diagnosis.
+  </p>
+</section>
+
+<main class="wrap">
+  <section class="panel">
+    <h2>Gejala dan nilai terminator</h2>
+    <div class="scroll">
+      <table>
+        <thead>
+          <tr>
+            <th>No</th>
+            <th>Kode</th>
+            <th>Gejala</th>
+            <th class="n">Nilai Terminator</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for kode, nama, nilai in gejala %}
+          <tr>
+            <td>{{ loop.index }}</td>
+            <td>{{ kode }}</td>
+            <td>{{ nama }}</td>
+            <td class="n">{{ "%.1f"|format(nilai) }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <p class="note">
+      Nilai terminator menunjukkan seberapa kuat sebuah gejala menandakan karies
+      gigi, dari 0 (tidak berpengaruh) sampai 1 (sangat kuat). Nilai ini
+      ditetapkan oleh pakar dan dikalikan dengan tingkat keyakinan pasien saat
+      diagnosis.
+    </p>
+  </section>
+
+  <section class="panel">
+    <h2>Interpretasi persentase hasil</h2>
+    <div class="scroll">
+      <table>
+        <thead>
+          <tr>
+            <th>Persentase CF</th>
+            <th>Interpretasi</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for rentang, nama in skala %}
+          <tr>
+            <td>{{ rentang }}</td>
+            <td>{{ nama }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+</main>
+{% endblock %}

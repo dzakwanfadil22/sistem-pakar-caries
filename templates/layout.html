@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{% block title %}Dental-CF{% endblock %}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='style.css') }}"
+    />
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='sidebar.css') }}"
+    />
+    <script>
+      /* Terapkan keadaan sidebar sebelum halaman digambar agar tidak berkedip */
+      (function () {
+        var tutup = window.matchMedia("(max-width:820px)").matches;
+        if (!tutup) {
+          try {
+            tutup = localStorage.getItem("side_tutup") === "1";
+          } catch (e) {}
+        }
+        if (tutup) document.documentElement.classList.add("side-closed");
+      })();
+    </script>
+  </head>
+  <body>
+    <button
+      class="burger noprint"
+      id="burger"
+      type="button"
+      aria-label="Buka menu"
+      aria-controls="side"
+    >
+      ☰
+    </button>
+
+    <aside class="side noprint" id="side">
+      <div class="side-head">
+        <a class="brand" href="/"
+          ><span class="logo">🦷</span><span>Dental-<b>CF</b></span></a
+        >
+        <button
+          class="side-close"
+          id="tutup"
+          type="button"
+          aria-label="Tutup menu"
+        >
+          ✕
+        </button>
+      </div>
+      <nav>
+        <a href="/" class="{{ 'on' if request.path == '/' }}"
+          ><span class="ic">🩺</span>Diagnosis</a
+        >
+        <a href="/pakar" class="{{ 'on' if request.path == '/pakar' }}"
+          ><span class="ic">📋</span>Data Pakar</a
+        >
+        <a href="/evaluasi" class="{{ 'on' if request.path == '/evaluasi' }}"
+          ><span class="ic">📊</span>Evaluasi</a
+        >
+        <a href="/riwayat" class="{{ 'on' if request.path == '/riwayat' }}"
+          ><span class="ic">🗂️</span>Riwayat</a
+        >
+      </nav>
+      <p class="side-foot">Sistem pakar<br />Certainty Factor</p>
+    </aside>
+    <div class="backdrop noprint" id="backdrop"></div>
+
+    <div class="content">{% block body %}{% endblock %}</div>
+
+    <script>
+      (function () {
+        var root = document.documentElement;
+        function set(tutup) {
+          root.classList.toggle("side-closed", tutup);
+          if (!window.matchMedia("(max-width:820px)").matches) {
+            try {
+              localStorage.setItem("side_tutup", tutup ? "1" : "0");
+            } catch (e) {}
+          }
+        }
+        document
+          .getElementById("burger")
+          .addEventListener("click", function () {
+            set(false);
+          });
+        document.getElementById("tutup").addEventListener("click", function () {
+          set(true);
+        });
+        document
+          .getElementById("backdrop")
+          .addEventListener("click", function () {
+            set(true);
+          });
+        document.addEventListener("keydown", function (e) {
+          if (e.key === "Escape") set(true);
+        });
+      })();
+    </script>
+  </body>
+</html>

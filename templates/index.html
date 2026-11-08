@@ -1,0 +1,112 @@
+{% extends "layout.html" %} {% block title %}Diagnosis Karies Gigi{% endblock %}
+{% block body %}
+<section class="hero noprint">
+  <h1>Cek risiko karies gigi Anda</h1>
+  <p>
+    Sistem menghitung tingkat
+    keyakinan diagnosis dengan metode Certainty Factor, berdasarkan data pakar.
+  </p>
+</section>
+
+<main class="wrap">
+  <form id="form" class="panel noprint" autocomplete="off">
+    <div class="grid2">
+      <label
+        >Nama pasien<input
+          name="nama"
+          type="text"
+          required
+          placeholder="Masukkan nama anda"
+      /></label>
+      <label
+        >Umur<input
+          name="umur"
+          type="number"
+          min="1"
+          max="100"
+          required
+          placeholder="Tahun"
+      /></label>
+    </div>
+
+    <h2>Gejala yang dialami</h2>
+    {% for kode, nama, _ in gejala %}
+    <fieldset class="gejala">
+      <legend><span class="kode">{{ kode }}</span>{{ nama }}</legend>
+      <div class="chips">
+        {% for label, nilai in pilihan %}
+        <label class="chip">
+          <input
+            type="radio"
+            name="{{ kode }}"
+            value="{{ nilai }}"
+            {%
+            if
+            loop.first
+            %}checked{%
+            endif
+            %}
+          />
+          <span>{{ label }}</span>
+        </label>
+        {% endfor %}
+      </div>
+    </fieldset>
+    {% endfor %}
+
+    <div class="actions">
+      <button class="btn" type="submit">Hitung diagnosis</button>
+      <button class="btn ghost" type="reset" id="reset">Reset</button>
+    </div>
+    <p id="err" class="error" role="alert"></p>
+  </form>
+
+  <section id="hasil" class="panel result" hidden>
+    <div class="print-head">Hasil Diagnosis Karies Gigi (Certainty Factor)</div>
+    <div class="result-top">
+      <div class="gauge">
+        <svg viewBox="0 0 120 120" aria-hidden="true">
+          <circle cx="60" cy="60" r="52" class="track" />
+          <circle cx="60" cy="60" r="52" class="fill" id="arc" />
+        </svg>
+        <div class="gauge-num">
+          <span><span id="persen">0</span><small>%</small></span>
+        </div>
+      </div>
+      <div>
+        <p class="muted" id="meta"></p>
+        <h2 id="vonis"></h2>
+        <p id="saran" class="muted"></p>
+        <p id="simpan" class="badge"></p>
+      </div>
+    </div>
+
+    <h3>Rincian perhitungan</h3>
+    <div class="scroll">
+      <table>
+        <thead>
+          <tr>
+            <th>Kode</th>
+            <th>Gejala</th>
+            <th>CF pakar</th>
+            <th>CF pasien</th>
+            <th>CF[H,E]</th>
+            <th>CF kombinasi</th>
+          </tr>
+        </thead>
+        <tbody id="rincian"></tbody>
+      </table>
+    </div>
+
+    <div class="actions noprint">
+      <button class="btn" id="cetak" type="button">Cetak hasil</button>
+      <a class="btn ghost" href="/riwayat">Lihat riwayat</a>
+    </div>
+    <p class="note">
+      Hasil ini alat bantu awal berbasis aturan pakar, bukan pengganti
+      pemeriksaan dokter gigi.
+    </p>
+  </section>
+</main>
+<script src="{{ url_for('static', filename='app.js') }}"></script>
+{% endblock %}

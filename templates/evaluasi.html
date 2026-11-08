@@ -1,0 +1,348 @@
+{% extends "layout.html" %} {% block title %}Evaluasi Sistem{% endblock %} {%
+block body %}
+<style>
+  .cm {
+    width: auto;
+    border-collapse: separate;
+    border-spacing: 6px;
+    margin: 8px 0 4px;
+  }
+  .cm th {
+    background: none;
+    color: var(--mute);
+    font-size: 0.8rem;
+    padding: 6px 10px;
+    text-align: center;
+  }
+  .cm td {
+    width: 150px;
+    height: 96px;
+    text-align: center;
+    border: 0;
+    border-radius: 12px;
+    font-size: 2rem;
+    font-weight: 800;
+    padding: 0;
+  }
+  .cm td small {
+    display: block;
+    font-size: 0.72rem;
+    font-weight: 600;
+    opacity: 0.8;
+  }
+  .kartu4 {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin: 20px 0 6px;
+  }
+  @media (max-width: 700px) {
+    .kartu4 {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+  .kartu4 > div {
+    background: var(--soft);
+    border-radius: 14px;
+    padding: 14px 16px;
+  }
+  .kartu4 small {
+    color: var(--mute);
+    font-weight: 600;
+  }
+  .kartu4 b {
+    display: block;
+    font-size: 1.6rem;
+    color: var(--teal);
+  }
+  tr.salah td {
+    background: var(--redsoft);
+  }
+  td.n,
+  th.n {
+    text-align: right;
+  }
+  @media (max-width: 600px) {
+    .cm {
+      width: 100%;
+      table-layout: fixed;
+      border-spacing: 4px;
+    }
+    .cm th {
+      padding: 4px 2px;
+      font-size: 0.68rem;
+    }
+    .cm td {
+      width: auto;
+      height: 76px;
+      font-size: 1.5rem;
+    }
+  }
+  @media print {
+    .kartu4 > div {
+      background: #fff;
+      border: 1px solid #999;
+    }
+  }
+</style>
+<section class="hero noprint">
+  <h1>Evaluasi sistem (Confusion Matrix)</h1>
+  <p>
+    Unggah data uji berisi gejala pasien dan diagnosis sebenarnya dari dokter.
+    Sistem menghitung Accuracy, Precision, Recall, dan F1-Score.
+  </p>
+</section>
+
+<main class="wrap">
+  <section class="panel noprint">
+    <h2>1. Unggah data uji (CSV)</h2>
+    <form id="fev">
+      <label class="drop" id="drop">
+        <input type="file" id="berkas" accept=".csv,text/csv" />
+        <span class="drop-ic">📊</span>
+        <b>Klik untuk memilih file CSV</b>
+        <small>atau seret file ke sini · maksimal 5 MB</small>
+      </label>
+      <div class="berkas" id="kartu" hidden>
+        <span class="berkas-ic">📊</span>
+        <div class="berkas-info"><b id="kn"></b><small id="ks"></small></div>
+        <button
+          type="button"
+          class="x"
+          id="batal"
+          aria-label="Batalkan file"
+          title="Batalkan / ganti file"
+        >
+          ✕
+        </button>
+      </div>
+      <div class="grid2" style="margin-top: 18px">
+        <label
+          >Threshold (CF ≥ nilai ini dianggap Positif)
+          <input id="th" type="number" min="0" max="1" step="0.05" value="0.5"
+        /></label>
+      </div>
+      <div class="actions">
+        <button class="btn" id="hitung" type="submit" disabled>
+          Hitung evaluasi
+        </button>
+      </div>
+      <p id="err" class="error" role="alert"></p>
+    </form>
+  </section>
+
+  <section id="hasil" hidden>
+    <div class="panel">
+      <div class="print-head">Evaluasi Sistem Pakar Karies Gigi</div>
+      <h2 id="jud" style="margin-top: 0"></h2>
+      <p class="muted" id="sub"></p>
+      <table class="cm" id="cm"></table>
+      <div class="kartu4" id="kartu4"></div>
+
+      <h3>Perbandingan threshold</h3>
+      <div class="scroll">
+        <table>
+          <thead>
+            <tr>
+              <th class="n">Threshold</th>
+              <th class="n">TP</th>
+              <th class="n">TN</th>
+              <th class="n">FP</th>
+              <th class="n">FN</th>
+              <th class="n">Accuracy</th>
+              <th class="n">Precision</th>
+              <th class="n">Recall</th>
+              <th class="n">F1-Score</th>
+            </tr>
+          </thead>
+          <tbody id="banding"></tbody>
+        </table>
+      </div>
+
+      <h3>Hasil per data</h3>
+      <div class="scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>No</th>
+              <th>Nama</th>
+              <th class="n">CF</th>
+              <th>Class Prediksi</th>
+              <th>Class Asli</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="detail"></tbody>
+        </table>
+      </div>
+      <div class="actions noprint">
+        <button class="btn" id="cetak" type="button">Cetak hasil</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel noprint">
+    <h2>Format file CSV</h2>
+    <p class="muted">
+      Baris pertama adalah judul kolom. Kolom <b>G01</b> sampai
+      <b>G10</b> berisi keyakinan pasien (angka 0 sampai 1, atau label seperti
+      "Yakin"), dan kolom <b>label</b> berisi diagnosis sebenarnya dari dokter
+      (<b>Positif</b> = karies, <b>Negatif</b> = tidak). Kolom <b>nama</b> boleh
+      ditambahkan.
+    </p>
+    <pre class="kode-blok">
+nama,G01,G02,G03,G04,G05,G06,G07,G08,G09,G10,label
+Askary,0.6,0.6,0,0.4,0,0,0,0,0.6,0,Positif
+Fikri,0,0,0,0,0,0.4,0.2,0,0.2,0,Negatif</pre
+    >
+    <p class="muted">
+      File dari Excel (pemisah titik koma) juga terbaca. Simpan dengan
+      <i>Save as → CSV</i>.
+    </p>
+    <div class="actions">
+      <a
+        class="btn ghost"
+        href="{{ url_for('static', filename='contoh_data_uji.csv') }}"
+        download
+        >Unduh contoh data uji</a
+      >
+    </div>
+  </section>
+</main>
+
+<script>
+  const $ = (s) => document.querySelector(s);
+  const inp = $("#berkas"),
+    drop = $("#drop");
+  let berkas = null;
+
+  function bersih() {
+    $("#kartu").hidden = true;
+    drop.hidden = false;
+    $("#hasil").hidden = true;
+    $("#err").textContent = "";
+    $("#hitung").disabled = true;
+  }
+  function reset() {
+    inp.value = "";
+    berkas = null;
+    bersih();
+  }
+  function pilih(f) {
+    bersih();
+    if (!f) {
+      berkas = null;
+      return;
+    }
+    if (!f.name.toLowerCase().endsWith(".csv")) {
+      $("#err").textContent = "File harus berformat CSV.";
+      inp.value = "";
+      berkas = null;
+      return;
+    }
+    berkas = f;
+    $("#kn").textContent = f.name;
+    $("#ks").textContent = (f.size / 1024).toFixed(0) + " KB";
+    drop.hidden = true;
+    $("#kartu").hidden = false;
+    $("#hitung").disabled = false;
+  }
+  inp.addEventListener("change", () => pilih(inp.files[0]));
+  $("#batal").addEventListener("click", reset);
+  ["dragover", "dragenter"].forEach((ev) =>
+    drop.addEventListener(ev, (e) => {
+      e.preventDefault();
+      drop.classList.add("over");
+    }),
+  );
+  ["dragleave", "drop"].forEach((ev) =>
+    drop.addEventListener(ev, (e) => {
+      e.preventDefault();
+      drop.classList.remove("over");
+    }),
+  );
+  drop.addEventListener("drop", (e) => {
+    if (e.dataTransfer.files[0]) {
+      inp.files = e.dataTransfer.files;
+      pilih(inp.files[0]);
+    }
+  });
+
+  $("#fev").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    if (!berkas) return;
+    const b = $("#hitung");
+    b.disabled = true;
+    b.textContent = "Menghitung...";
+    $("#err").textContent = "";
+    const fd = new FormData();
+    fd.append("file", berkas);
+    fd.append("threshold", $("#th").value);
+    try {
+      const r = await fetch("/api/evaluasi", { method: "POST", body: fd });
+      let d;
+      try {
+        d = await r.json();
+      } catch {
+        throw new Error("Gagal membaca file (mungkin lebih dari 5 MB).");
+      }
+      if (!r.ok) throw new Error(d.error || "Terjadi kesalahan.");
+      tampil(d);
+    } catch (err) {
+      $("#err").textContent = err.message;
+      $("#hasil").hidden = true;
+    }
+    b.disabled = false;
+    b.textContent = "Hitung evaluasi";
+  });
+
+  const pct = (x) => (x * 100).toFixed(2) + "%";
+  const f3 = (x) => x.toFixed(3);
+
+  function tampil(d) {
+    const m = d.metrik;
+    $("#jud").textContent = `Confusion Matrix (threshold = ${d.threshold})`;
+    $("#sub").textContent =
+      `${d.n} data uji: ${d.positif} Positif, ${d.negatif} Negatif`;
+    const maks = Math.max(m.tp, m.tn, m.fp, m.fn, 1);
+    const sel = (n, nama, benar) => {
+      const a = 0.12 + (0.88 * n) / maks;
+      const warna = benar
+        ? `rgba(14,124,123,${a})`
+        : `rgba(209,73,63,${a * 0.85})`;
+      return `<td style="background:${warna};color:${a > 0.55 ? "#fff" : "var(--ink)"}">${n}<small>${nama}</small></td>`;
+    };
+    $("#cm").innerHTML =
+      `<tr><th></th><th>Prediksi Negatif</th><th>Prediksi Positif</th></tr>
+     <tr><th>Aktual Negatif</th>${sel(m.tn, "TN", true)}${sel(m.fp, "FP", false)}</tr>
+     <tr><th>Aktual Positif</th>${sel(m.fn, "FN", false)}${sel(m.tp, "TP", true)}</tr>`;
+    $("#kartu4").innerHTML = [
+      ["Accuracy", m.accuracy],
+      ["Precision", m.precision],
+      ["Recall", m.recall],
+      ["F1-Score", m.f1],
+    ]
+      .map(([n, v]) => `<div><small>${n}</small><b>${pct(v)}</b></div>`)
+      .join("");
+    $("#banding").innerHTML = d.perbandingan
+      .map(
+        (x) =>
+          `<tr ${x.threshold === d.threshold ? 'style="font-weight:700"' : ""}><td class="n">${x.threshold}</td>
+     <td class="n">${x.tp}</td><td class="n">${x.tn}</td><td class="n">${x.fp}</td><td class="n">${x.fn}</td>
+     <td class="n">${f3(x.accuracy)}</td><td class="n">${f3(x.precision)}</td><td class="n">${f3(x.recall)}</td><td class="n">${f3(x.f1)}</td></tr>`,
+      )
+      .join("");
+    const L = (v) => (v ? "Positif" : "Negatif");
+    $("#detail").innerHTML = d.detail
+      .map(
+        (r) =>
+          `<tr class="${r.benar ? "" : "salah"}"><td>${r.no}</td><td>${r.nama}</td><td class="n">${r.persen.toFixed(2)}%</td>
+     <td>${L(r.prediksi)}</td><td>${L(r.aktual)}</td><td>${r.benar ? "✅ Benar" : "❌ Salah"}</td></tr>`,
+      )
+      .join("");
+    $("#hasil").hidden = false;
+    $("#hasil").scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+  $("#cetak").addEventListener("click", () => window.print());
+</script>
+{% endblock %}
