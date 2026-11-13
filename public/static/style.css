@@ -381,3 +381,5 @@ th {
 .result.sedang h2 {
   color: #b57f00;
 }
+
+.result-top>div:last-child{flex:1 1 280px;min-width:0}

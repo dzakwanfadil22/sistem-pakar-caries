@@ -28,12 +28,12 @@ AMBANG = 0.5  # batas keputusan "terindikasi karies" (ubah sesuai pakar)
 
 # Interpretasi persentase CF: (batas atas %, nama tingkat, saran, nada warna)
 TINGKAT = [
-    (0,   "Tidak ada keyakinan", "Tidak ada gejala yang mengarah ke karies dari isian ini. Tetap rutin menyikat gigi.", "aman"),
-    (20,  "Sangat rendah", "Kemungkinan karies sangat kecil. Jaga kebersihan gigi dan periksa rutin tiap 6 bulan.", "aman"),
-    (40,  "Rendah", "Kemungkinan karies rendah. Pantau gejala dan periksa ke dokter gigi bila bertambah.", "aman"),
-    (60,  "Sedang (Superfisialis)", "Kemungkinan karies Superfisialis. Periksakan ke dokter gigi sebelum meluas.", "sedang"),
-    (80,  "Tinggi (Media)", "Kemungkinan karies Media yang mencapai dentin. Segera periksa ke dokter gigi.", "bahaya"),
-    (100, "Sangat tinggi (Profunda)", "Kemungkinan karies Profunda dekat saraf gigi. Segera ke dokter gigi sebelum parah.", "bahaya"),
+    (0,   "Tidak ada keyakinan", "Tidak ada gejala yang mengarah ke karies dari isian ini. Pertahankan kebiasaan baik: sikat gigi 2 kali sehari dengan pasta gigi berfluoride, bersihkan sela gigi dengan benang gigi, dan periksa ke dokter gigi tiap 6 bulan.", "aman"),
+    (20,  "Sangat rendah", "Kemungkinan karies sangat kecil. Sikat gigi 2 kali sehari (setelah sarapan dan sebelum tidur) dengan pasta gigi berfluoride, batasi makanan dan minuman manis, dan perhatikan apakah muncul gejala baru.", "aman"),
+    (40,  "Rendah", "Kemungkinan karies rendah. Sikat gigi dengan teknik yang benar selama 2 menit, gunakan benang gigi, kurangi camilan manis, dan berkumur dengan air putih setelah makan. Jika gejala bertambah atau tidak membaik dalam 1-2 minggu, periksakan ke dokter gigi.", "aman"),
+    (60,  "Sedang (Superfisialis)", "Kemungkinan karies Superfisialis, yaitu kerusakan baru di lapisan email gigi. Pada tahap ini perawatan masih mudah, jadi jadwalkan pemeriksaan ke dokter gigi dalam waktu dekat. Sementara itu, sikat gigi 2 kali sehari dengan pasta gigi berfluoride, kurangi makanan manis dan lengket, serta bersihkan sisa makanan yang menempel di gigi.", "sedang"),
+    (80,  "Tinggi (Media)", "Kemungkinan karies Media yang sudah mencapai dentin, sehingga gigi bisa terasa ngilu saat terkena panas, dingin, atau manis. Hindari makanan dan minuman yang terlalu panas, dingin, atau manis, kunyah di sisi gigi yang tidak sakit, dan sikat gigi dengan lembut. Segera periksakan ke dokter gigi agar kerusakan tidak sampai ke saraf.", "bahaya"),
+    (100, "Sangat tinggi (Profunda)", "Kemungkinan karies Profunda yang sudah dekat dengan saraf gigi dan bisa menimbulkan nyeri hebat atau infeksi. Segera periksa ke dokter gigi dan jangan menunda. Sambil menunggu, hindari mengunyah di sisi yang sakit, jaga kebersihan mulut dengan lembut, dan jangan menempelkan obat atau bahan apa pun pada gigi atau gusi. Segera ke layanan kesehatan jika muncul bengkak pada wajah atau gusi, demam, atau nyeri yang tidak tertahankan.", "bahaya"),
 ]
 
 def tingkat(persen):
